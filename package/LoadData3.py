@@ -20,8 +20,11 @@ from collections import defaultdict
 
 # 创建主窗口
 root = tk.Tk()
-root.title("商品评论情感分类")
-
+root.title("基于聚类算法的评论情感分析系统")
+#root.iconbitmap('icon.ico')
+def reset_ui():
+    entry.delete(0, tk.END)
+    progress_bar.stop()
 # 添加文件选择函数
 def select_file():
     file_path = filedialog.askopenfilename()
@@ -30,15 +33,17 @@ def select_file():
 
 # 添加运行函数
 def run_analysis():
+
+
     file_path = entry.get()
     if not file_path:
-        messagebox.showerror("错误", "请选择数据文件")
+        messagebox.showwarning("错误", "请选择数据文件")
         return
 
     try:
         data = pd.read_csv(file_path)
     except Exception as e:
-        messagebox.showerror("错误", f"读取文件失败：{e}")
+        (messagebox.showwarning("错误", f"读取文件失败：{e}"))
         return
 
     data.dropna(axis=0, inplace=True)
@@ -94,6 +99,7 @@ def run_analysis():
     t.start()
 
 def run_dbscan():
+
     file_path = entry.get()
     if not file_path:
         messagebox.showerror("错误", "请选择数据文件")
@@ -157,7 +163,7 @@ def run_dbscan():
 def visualize_data(data, stopwords):
     # 绘制好评和差评的词云图
     keywords_pos = jieba.analyse.extract_tags(''.join(data['Comment'][data['Class'] == 1]), withWeight=True, topK=30)
-    keywords_neg = jieba.analyse.extract_tags('.join(data['Comment'][data['Class'] == -1]), withWeight=True, topK=30)
+    keywords_neg = jieba.analyse.extract_tags(''.join(data['Comment'][data['Class'] == -1]), withWeight=True, topK=30)
 
     wordcloud_pos = (
         WordCloud()
@@ -185,22 +191,6 @@ def visualize_data(data, stopwords):
         .set_global_opts(title_opts=opts.TitleOpts(title="Bar chart of the number of positive, neutral and negative reviews"))
     )
 
-    # 绘制散点图
-    plt.figure(figsize=(8, 6))
-    plt.scatter(data_transform[:, 0], data_transform[:, 1], c=data['Class'], cmap=plt.cm.Set1, edgecolor='k', s=40)
-    plt.title("Scatter Plot of Comments")
-    plt.xlabel("Feature 1")
-    plt.ylabel("Feature 2")
-    plt.grid(True)
-    plt.show()
-
-    # 绘制饼状图
-    plt.figure(figsize=(8, 6))
-    plt.pie(class_counts, labels=x_label, autopct='%1.1f%%', startangle=140)
-    plt.title("Pie Chart of the Distribution of Sentiment Classes")
-    plt.axis('equal')
-    plt.show()
-
     # 展示词云图和柱状图
     wordcloud_pos.render("wordcloud_pos.html")
     wordcloud_neg.render("wordcloud_neg.html")
@@ -213,9 +203,13 @@ def visualize_data(data, stopwords):
     plt.ylabel("Number")
     plt.show()
 
+    reset_ui()
+
+
+
 
 # 添加文件选择按钮和输入框
-label = tk.Label(root, text="请选择数据文件：")
+label = tk.Label(root, text="请选择csv数据文件：")
 label.grid(row=0, column=0, padx=10, pady=10)
 
 entry = tk.Entry(root, width=50)
@@ -227,7 +221,7 @@ button_select.grid(row=0, column=2, padx=10, pady=10)
 # 添加运行按钮
 button_run = tk.Button(root, text="运行分析", command=run_analysis)
 button_run.grid(row=1, column=1, padx=10, pady=10)
-button_run_dbscan = tk.Button(root, text="运行DBSCAN", command=run_dbscan)
+button_run_dbscan = tk.Button(root, text="运行DBSCAN进行簇分类", command=run_dbscan)
 button_run_dbscan.grid(row=1, column=2, padx=10, pady=10)
 
 # 添加进度条
